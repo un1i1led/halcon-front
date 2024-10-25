@@ -67,18 +67,7 @@ api.interceptors.response.use(
     return response;
   },
   async (error: AxiosError): Promise<ApiError> => {
-    const originalRequest = error.config;
-
     if (error.response?.status === 401) {
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (refreshToken && originalRequest) {
-          // Implement your token refresh logic here
-          // const newToken = await refreshTokenApi(refreshToken);
-          // localStorage.setItem('token', newToken);
-          // return api(originalRequest);
-        }
-      } catch (refreshError) {
         localStorage.clear();
         window.location.href = '/login';
         useNotificationStore.getState().addNotification({
@@ -86,9 +75,7 @@ api.interceptors.response.use(
           message: 'Session expired. Please log in again.',
           duration: 5000,
         });
-        console.error(refreshError);
       }
-    }
 
     const responseData = error.response?.data as ErrorResponseData;
     const apiError: ApiError = {
