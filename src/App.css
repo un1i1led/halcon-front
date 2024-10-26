@@ -16,14 +16,13 @@ body {
 }
 
 .content {
-  align-items: center;
   justify-content: center;
   flex-direction: column;
 }
 
 .top-table {
   display: flex;
-  justify-content: end;
+  justify-content: space-between;
   margin-bottom: 1rem;
 }
 

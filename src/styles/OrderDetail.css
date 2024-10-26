@@ -1,0 +1,57 @@
+.order-detail {
+  width: 100%;
+  height: 100%;
+}
+
+.order-detail > div:first-child {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.order-detail .header {
+  display: flex;
+  padding: 5rem 0 0 5rem;
+}
+
+.order-content {
+  flex: 1;
+  justify-content: space-between;
+  align-items: center;
+  grid-template-columns: 1fr .1fr 1fr;
+}
+
+.divider-div {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.divider {
+  height: 90%;
+  width: 1px;
+  border: 1px solid lightgray;
+}
+
+.modal {
+  display: flex;
+  justify-content: center;
+}
+
+.modal form {
+  display: flex;
+  flex-direction: column;
+  min-width: 500px;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+.info {
+  display: flex;
+  justify-content: center;
+}
