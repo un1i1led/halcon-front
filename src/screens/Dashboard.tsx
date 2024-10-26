@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import api from '../services/api';
 import GenericTable from '../components/GenericTable';
 import { Row, Column } from '../types/TableTypes';
-import { Button } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 import AddOrderModel from '../components/Orders/AddOrderModel';
 import { Order } from '../types/Order';
 
 const Dashboard = () => {
   const [orders, setOrders] = useState<Row[]>([]);
+  const [orderAmount, setOrderAmount] = useState(0);
   const [addingOrder, setAddingOrder] = useState(false);
 
   const getOrders = async () => {
@@ -16,6 +17,7 @@ const Dashboard = () => {
     });
     if (response.data) {
       setOrders(response.data.data);
+      setOrderAmount(response.data.totalItems);
     } else {
       return;
     }
@@ -31,6 +33,7 @@ const Dashboard = () => {
 
   const onOrderAdded = (newOrder: Partial<Order>) => {
     setOrders([...orders, newOrder]);
+    setOrderAmount(prev => prev + 1);
   }
 
   const columns: Column[] = [
@@ -74,6 +77,15 @@ const Dashboard = () => {
       <div className='content'>
         <div className='centered'>
           <div className='top-table'>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant='h4'>Orders - </Typography>
+              <Typography 
+                variant='h4' 
+                sx={{ marginLeft: 1, color: '#aeacac' }}
+              >
+                {orderAmount}
+              </Typography>
+            </div>
             <Button 
               variant='contained'
               onClick={() => setAddingOrder(true)}
