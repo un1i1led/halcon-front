@@ -16,9 +16,8 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import LayersIcon from '@mui/icons-material/Layers';
+import GroupIcon from '@mui/icons-material/Group';
+import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const drawerWidth = 240;
@@ -114,20 +113,15 @@ const navigationItems: NavigationItem[] = [
     icon: <DashboardIcon />,
   },
   {
-    path: '/orders',
-    title: 'Orders',
-    icon: <ShoppingCartIcon />,
+    path: '/users',
+    title: 'Usuarios',
+    icon: <GroupIcon />,
   },
   {
-    path: '/reports',
-    title: 'Reports',
-    icon: <BarChartIcon />,
-  },
-  {
-    path: '/integrations',
-    title: 'Integrations',
-    icon: <LayersIcon />,
-  },
+    path: '/customers',
+    title: 'Clientes',
+    icon: <ShoppingBagIcon />
+  }
 ];
 
 interface DashboardLayoutProps {

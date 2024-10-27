@@ -9,6 +9,7 @@ import theme from './theme';
 import PrivateRouter from './components/ProtectedRoute/ProtectedRoute';
 import { Notification } from './components/Notification';
 import OrderDetail from './screens/OrderDetail';
+import Users from './screens/Users';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
                 <DashboardLayout>
                   <Routes>
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path='/users' element={<Users />} />
                   </Routes>
                 </DashboardLayout>
               }
