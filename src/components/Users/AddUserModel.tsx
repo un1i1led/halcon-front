@@ -1,10 +1,10 @@
-import { Button, Dialog, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
-import { User } from "../../types/User";
+import { Button, Dialog, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { User } from '../../types/User';
 import * as yup from 'yup';
-import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import api from "../../services/api";
-import { useEffect } from "react";
+import { useForm, Controller, SubmitHandler } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import api from '../../services/api';
+import { useEffect } from 'react';
 
 interface AddUserModelProps {
   open: boolean;
@@ -105,30 +105,30 @@ const AddUserModel = ({ open, onClose, onUserAdded }: AddUserModelProps) => {
             helperText={errors.password?.message}
             margin='normal'
           />
-          <FormControl fullWidth margin="normal" error={!!errors.role}>
-            <InputLabel id="user-role">Rol</InputLabel>
+          <FormControl fullWidth margin='normal' error={!!errors.role}>
+            <InputLabel id='user-role'>Rol</InputLabel>
             <Controller
-              name="role"
+              name='role'
               control={control}
               render={({ field }) => (
                 <Select
-                  labelId="user-role"
-                  id="user-role-select"
-                  label="Rol"
+                  labelId='user-role'
+                  id='user-role-select'
+                  label='Rol'
                   {...field}
                 >
-                  <MenuItem value="admin">Admin</MenuItem>
-                  <MenuItem value="sales">Sales</MenuItem>
-                  <MenuItem value="purchasing">Purchasing</MenuItem>
-                  <MenuItem value="warehouse">Warehouse</MenuItem>
-                  <MenuItem value="route">Route</MenuItem>
+                  <MenuItem value='admin'>Admin</MenuItem>
+                  <MenuItem value='sales'>Sales</MenuItem>
+                  <MenuItem value='purchasing'>Purchasing</MenuItem>
+                  <MenuItem value='warehouse'>Warehouse</MenuItem>
+                  <MenuItem value='route'>Route</MenuItem>
                 </Select>
               )}
             />
             {errors.role && <p style={{ color: 'red' }}>{errors.role.message}</p>}
           </FormControl>
           <Button 
-            type="submit"
+            type='submit'
             sx={{ marginY: '1rem' }}
           >
             Agregar Usuario
