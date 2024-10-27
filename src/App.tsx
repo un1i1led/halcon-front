@@ -10,6 +10,7 @@ import PrivateRouter from './components/ProtectedRoute/ProtectedRoute';
 import { Notification } from './components/Notification';
 import OrderDetail from './screens/OrderDetail';
 import Users from './screens/Users';
+import Customers from './screens/Customers';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
                   <Routes>
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path='/users' element={<Users />} />
+                    <Route path='/customers' element={<Customers />} />
                   </Routes>
                 </DashboardLayout>
               }
