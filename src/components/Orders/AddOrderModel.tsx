@@ -150,7 +150,7 @@ const AddOrderModel = ({ open, onClose, onOrderAdded}: AddOrderModelProps) => {
           />
           <Button
             type='submit'
-            sx={{ margin: '1rem' }}
+            sx={{ marginY: '1rem' }}
           >
             Enviar
           </Button>
