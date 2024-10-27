@@ -18,6 +18,7 @@ import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import GroupIcon from '@mui/icons-material/Group';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
+import { Logout } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const drawerWidth = 240;
@@ -106,54 +107,164 @@ interface NavigationItem {
   icon: React.ReactNode;
 }
 
-const navigationItems: NavigationItem[] = [
-  {
-    path: '/dashboard',
-    title: 'Dashboard',
-    icon: <DashboardIcon />,
-  },
-  {
-    path: '/users',
-    title: 'Usuarios',
-    icon: <GroupIcon />,
-  },
-  {
-    path: '/customers',
-    title: 'Clientes',
-    icon: <ShoppingBagIcon />
-  }
-];
+const useNavigationItems = (userRole?: string) => {
+  return React.useMemo(() => {
+    const items: NavigationItem[] = [
+      {
+        path: '/dashboard',
+        title: 'Dashboard',
+        icon: <DashboardIcon />,
+      }
+    ];
 
-interface DashboardLayoutProps {
-  children: React.ReactNode;
-}
+    if (userRole === 'admin') {
+      items.push(
+        {
+          path: '/users',
+          title: 'Usuarios',
+          icon: <GroupIcon />,
+        },
+        {
+          path: '/customers',
+          title: 'Clientes',
+          icon: <ShoppingBagIcon />,
+        }
+      );
+    }
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+    return items;
+  }, [userRole]);
+};
+
+const DrawerContent = styled('div')({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+});
+
+const NavigationList: React.FC<{
+  items: NavigationItem[];
+  open: boolean;
+  onNavigate: (path: string) => void;
+  currentPath: string;
+}> = React.memo(({ items, open, onNavigate, currentPath }) => (
+  <List>
+    {items.map((item) => (
+      <ListItem key={item.path} disablePadding>
+        <ListItemButton
+          selected={currentPath === item.path}
+          onClick={() => onNavigate(item.path)}
+          sx={{
+            minHeight: 48,
+            justifyContent: open ? 'initial' : 'center',
+            px: 2.5,
+          }}
+        >
+          <ListItemIcon
+            sx={{
+              minWidth: 0,
+              mr: open ? 3 : 'auto',
+              justifyContent: 'center',
+            }}
+          >
+            {item.icon}
+          </ListItemIcon>
+          <ListItemText 
+            primary={item.title} 
+            sx={{ 
+              opacity: open ? 1 : 0,
+              transition: theme => theme.transitions.create('opacity', {
+                duration: theme.transitions.duration.shorter,
+              }),
+            }}
+          />
+        </ListItemButton>
+      </ListItem>
+    ))}
+  </List>
+));
+
+const LogoutButton: React.FC<{
+  open: boolean;
+  onLogout: () => void;
+}> = React.memo(({ open, onLogout }) => (
+  <List sx={{ mt: 'auto' }}>
+    <Divider />
+    <ListItem disablePadding sx={{ display: 'block' }}>
+      <ListItemButton
+        onClick={onLogout}
+        sx={{
+          minHeight: 48,
+          justifyContent: open ? 'initial' : 'center',
+          px: 2.5,
+        }}
+      >
+        <ListItemIcon
+          sx={{
+            minWidth: 0,
+            mr: open ? 3 : 'auto',
+            justifyContent: 'center',
+            color: 'white',
+          }}
+        >
+          <Logout />
+        </ListItemIcon>
+        <ListItemText 
+          primary='Cerrar Sesión' 
+          sx={{ 
+            opacity: open ? 1 : 0,
+            transition: theme => theme.transitions.create('opacity', {
+              duration: theme.transitions.duration.shorter,
+            }),
+          }}
+        />
+      </ListItemButton>
+    </ListItem>
+  </List>
+));
+
+LogoutButton.displayName = 'LogoutButton';
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  
+  const user = React.useMemo(() => {
+    const stored = localStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
+  }, []);
+  
+  const navigationItems = useNavigationItems(user?.role);
 
-  const handleDrawerOpen = () => {
+  const handleDrawerOpen = React.useCallback(() => {
     setOpen(true);
-  };
+  }, []);
 
-  const handleDrawerClose = () => {
+  const handleDrawerClose = React.useCallback(() => {
     setOpen(false);
-  };
+  }, []);
 
-  const handleNavigation = (path: string) => {
+  const handleNavigation = React.useCallback((path: string) => {
     navigate(path);
-  };
+  }, [navigate]);
+
+  const handleLogout = React.useCallback(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    navigate('/login');
+  }, [navigate]);
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar position="fixed" open={open}>
+      <AppBar position='fixed' open={open}>
         <Toolbar>
           <IconButton
-            color="inherit"
-            aria-label="open drawer"
+            color='inherit'
+            aria-label='open drawer'
             onClick={handleDrawerOpen}
-            edge="start"
+            edge='start'
             sx={{
               marginRight: 5,
               ...(open && { display: 'none' }),
@@ -161,13 +272,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
+          <Typography variant='h6' noWrap component='div'>
             Halcon Inc.
           </Typography>
         </Toolbar>
       </AppBar>
       <StyledDrawer 
-        variant="permanent" 
+        variant='permanent' 
         open={open}
         sx={{
           '& .MuiDrawer-paper': {
@@ -179,51 +290,26 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           }
         }}
       >
-        <DrawerHeader>
-          {open && (
-            <IconButton onClick={handleDrawerClose}>
-              <ChevronLeftIcon sx={{ color: 'white' }} />
-            </IconButton>
-          )}
-        </DrawerHeader>
-        <Divider />
-        <List>
-          {navigationItems.map((item) => (
-            <ListItem key={item.path} disablePadding>
-              <ListItemButton
-                selected={location.pathname === item.path}
-                onClick={() => handleNavigation(item.path)}
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText 
-                  primary={item.title} 
-                  sx={{ 
-                    opacity: open ? 1 : 0,
-                    transition: theme => theme.transitions.create('opacity', {
-                      duration: theme.transitions.duration.shorter,
-                    }),
-                  }}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
+        <DrawerContent>
+          <DrawerHeader>
+            {open && (
+              <IconButton onClick={handleDrawerClose}>
+                <ChevronLeftIcon sx={{ color: 'white' }} />
+              </IconButton>
+            )}
+          </DrawerHeader>
+          <Divider />
+          <NavigationList
+            items={navigationItems}
+            open={open}
+            onNavigate={handleNavigation}
+            currentPath={location.pathname}
+          />
+          <LogoutButton open={open} onLogout={handleLogout} />
+        </DrawerContent>
       </StyledDrawer>
       <Box
-        component="main"
+        component='main'
         sx={{
           flexGrow: 1,
           p: 3,
