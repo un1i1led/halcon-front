@@ -7,9 +7,9 @@ import AddOrderModel from '../components/Orders/AddOrderModel';
 import { Order } from '../types/Order';
 
 const Dashboard = () => {
-  const [orders, setOrders] = useState<Row[]>([]);
-  const [orderAmount, setOrderAmount] = useState(0);
-  const [addingOrder, setAddingOrder] = useState(false);
+  const [orders,      setOrders      ] = useState<Row[]>([]);
+  const [orderAmount, setOrderAmount ] = useState(0);
+  const [addingOrder, setAddingOrder ] = useState(false);
 
   const getOrders = async () => {
     const response = await api.get('orders', {
@@ -24,7 +24,7 @@ const Dashboard = () => {
   }
 
   useEffect(() => {
-    getOrders()
+    getOrders();
   }, [])
 
   const handleClose = () => {
@@ -78,10 +78,10 @@ const Dashboard = () => {
         <div className='centered'>
           <div className='top-table'>
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <Typography variant='h4'>Orders - </Typography>
+              <Typography variant='h4'>Órdenes - </Typography>
               <Typography 
                 variant='h4' 
-                sx={{ marginLeft: 1, color: '#aeacac' }}
+                sx={{ marginLeft: 1, color: '#AEACAC' }}
               >
                 {orderAmount}
               </Typography>
