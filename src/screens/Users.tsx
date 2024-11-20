@@ -5,11 +5,14 @@ import { User } from '../types/User';
 import GenericTable from '../components/GenericTable';
 import api from '../services/api';
 import AddUserModel from '../components/Users/AddUserModel';
+import ViewModal from '../components/ViewModal';
 
 const Users = () => {
-  const [users,      setUsers      ] = useState<Row[]>([]);
-  const [userAmount, setUserAmount ] = useState(0);
-  const [addingUser, setAddingUser ] = useState(false);
+  const [users,       setUsers       ] = useState<Row[]>([]);
+  const [userAmount,  setUserAmount  ] = useState(0);
+  const [addingUser,  setAddingUser  ] = useState(false);
+  const [viewingUser, setViewingUser ] = useState(false);
+  const [selectedRow, setSelectedRow ] = useState<{ [key: string]: string} | null>(null);
 
   const getUsers = async () => {
     const response = await api.get('users', {
@@ -30,6 +33,19 @@ const Users = () => {
 
   const handleClose = () => {
     setAddingUser(false);
+  }
+
+  const selectRow = (row: Row) => {
+    setViewingUser(true);
+    setSelectedRow(row as { [key: string]: string });
+  }
+
+  const unselectRow = () => {
+    setViewingUser(false);
+  }
+
+  const handleDialogExited = () => {
+    setSelectedRow(null);
   }
 
   const onUserAdded = (newUser: Partial<User>) => {
@@ -69,6 +85,15 @@ const Users = () => {
     }
   ]
 
+  const labels = {
+    deliveryAddress: 'Dirección de entrega',
+    notes: 'Notas',
+    status: 'Status',
+    customerNumber: 'Num. Cliente',
+    createdAt: 'Fecha Ordenado',
+    updatedAt: 'Fecha Actualizado',
+  };
+
   return (
     <div className='main users'>
       <div className='content'>
@@ -90,11 +115,25 @@ const Users = () => {
               Agregar Usuario
             </Button>
           </div>
-          <GenericTable columns={columns} data={users}/>
+          <GenericTable 
+            columns={columns} 
+            data={users}
+            onRowClick={selectRow}
+          />
           <AddUserModel
             open={addingUser}
             onClose={handleClose}
             onUserAdded={onUserAdded}
+          />
+          <ViewModal
+            open={viewingUser}
+            title={
+              `Usuario - ${selectedRow?.name}`
+            }
+            data={selectedRow}
+            labels={labels}
+            onClose={unselectRow}
+            handleDialogExited={handleDialogExited}
           />
         </div>
       </div>

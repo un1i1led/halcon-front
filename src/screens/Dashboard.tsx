@@ -2,18 +2,25 @@ import { useEffect, useState } from 'react';
 import api from '../services/api';
 import GenericTable from '../components/GenericTable';
 import { Row, Column } from '../types/TableTypes';
-import { Button, Typography } from '@mui/material';
+import { Button, Stack, Typography } from '@mui/material';
 import AddOrderModel from '../components/Orders/AddOrderModel';
-import { Order } from '../types/Order';
+import ViewModal from '../components/ViewModal';
+import HandleUpdates from '../components/Orders/HandleUpdates';
+import { getUserData } from '../utils/getUserData';
 
 const Dashboard = () => {
-  const [orders,      setOrders      ] = useState<Row[]>([]);
-  const [orderAmount, setOrderAmount ] = useState(0);
-  const [addingOrder, setAddingOrder ] = useState(false);
+  const [orders,       setOrders       ] = useState<Row[]>([]);
+  const [orderAmount,  setOrderAmount  ] = useState(0);
+  const [addingOrder,  setAddingOrder  ] = useState(false);
+  const [viewingOrder, setViewingOrder ] = useState(false);
+  const [selectedRow,  setSelectedRow  ] = useState<Row | null>(null);
+  const [added,        setAdded        ] = useState(false); 
+  
+  const user = getUserData();
 
   const getOrders = async () => {
     const response = await api.get('orders', {
-      params: {page: '1', limit: '10', status: '' }
+      params: { page: '1', limit: '10', status: '' }
     });
     if (response.data) {
       setOrders(response.data.data);
@@ -25,15 +32,29 @@ const Dashboard = () => {
 
   useEffect(() => {
     getOrders();
-  }, [])
+  }, [added])
 
   const handleClose = () => {
     setAddingOrder(false);
   }
 
-  const onOrderAdded = (newOrder: Partial<Order>) => {
-    setOrders([...orders, newOrder]);
-    setOrderAmount(prev => prev + 1);
+  const selectRow = (row: Row) => {
+    setViewingOrder(true);
+    setSelectedRow(row as { [key: string]: string });
+  }
+
+  const unselectRow = () => {
+    setViewingOrder(false);
+    setSelectedRow(null);
+  }
+
+  const handleEdit = () => {
+    setViewingOrder(false);
+    setAddingOrder(true);
+  }
+
+  const onOrderAdded = () => {
+    setAdded(prev => !prev);
   }
 
   const columns: Column[] = [
@@ -72,6 +93,14 @@ const Dashboard = () => {
     }
   ]
 
+  const labels = {
+    name: 'Nombre',
+    email: 'Correo',
+    role: 'Role',
+    createdAt: 'Fecha Creado',
+    updatedAt: 'Fecha Actualizado',
+  };
+
   return (
     <div className='main dashboard'>
       <div className='content'>
@@ -86,19 +115,49 @@ const Dashboard = () => {
                 {orderAmount}
               </Typography>
             </div>
-            <Button 
+            {['admin', 'sales'].includes(user.role) && (
+              <Button 
               variant='contained'
               onClick={() => setAddingOrder(true)}
-            >
-              Agregar Orden
-            </Button>
+              >
+                Agregar Orden
+              </Button>
+            )}
           </div>
-          <GenericTable columns={columns} data={orders}/>
+          <GenericTable 
+            columns={columns} 
+            data={orders}
+            onRowClick={selectRow}
+          />
           <AddOrderModel 
             open={addingOrder} 
             onClose={handleClose}
-            onOrderAdded={onOrderAdded}
+            onOrderSaved={onOrderAdded}
+            selectedOrder={selectedRow}
           />
+          <ViewModal
+            open={viewingOrder}
+            title={
+              `Orden ${selectedRow?.id} - Cliente ${selectedRow?.customerNumber}`
+            }
+            data={selectedRow}
+            labels={labels}
+            onClose={unselectRow}
+          >
+            <Stack 
+              spacing={2} 
+              direction={'row'} 
+            >
+              <Button onClick={handleEdit}>Editar</Button>
+              {selectedRow &&
+                <HandleUpdates
+                  selectedRow={selectedRow}
+                  setSelectedRow={setSelectedRow}
+                  onOrderAdded={onOrderAdded}
+                />
+              }
+            </Stack>
+          </ViewModal>
         </div>
       </div>
     </div>

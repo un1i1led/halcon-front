@@ -1,11 +1,11 @@
-import { Autocomplete, Button, Dialog, DialogContent, DialogTitle, TextField } from '@mui/material'
-import { Order } from '../../types/Order';
+import { Autocomplete, Button, Dialog, DialogContent, DialogTitle, TextField } from '@mui/material';
 import * as yup from 'yup';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import debounce from '../../utils/debounce';
+import { Row } from '../../types/TableTypes';
 
 interface Customer {
   customerNumber: string;
@@ -15,7 +15,8 @@ interface Customer {
 interface AddOrderModelProps {
   open: boolean;
   onClose: () => void;
-  onOrderAdded: (newOrder: Partial<Order>) => void;
+  onOrderSaved: () => void;
+  selectedOrder: Partial<Row> | null;
 }
 
 interface FormData {
@@ -24,94 +25,106 @@ interface FormData {
   notes?: string;
 }
 
-const AddOrderModel = ({ open, onClose, onOrderAdded}: AddOrderModelProps) => {
+const AddOrderModel = ({ open, onClose, onOrderSaved, selectedOrder }: AddOrderModelProps) => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(false);
 
   const schema = yup.object({
-    customerNumber: yup
-      .string()
-      .required('Cliente es requerido'),
-    deliveryAdress: yup
-      .string(),
-    notes: yup
-      .string()
-  })
+    customerNumber: yup.string().required('Cliente es requerido'),
+    deliveryAddress: yup.string(),
+    notes: yup.string(),
+  });
 
   const {
     handleSubmit,
     register,
     formState: { errors },
     control,
-    reset
+    reset,
+    setValue,
   } = useForm<FormData>({
     defaultValues: {
-      customerNumber: '',
-      deliveryAddress: '',
-      notes: ''
+      customerNumber: selectedOrder?.customerNumber as string || '',
+      deliveryAddress: selectedOrder?.deliveryAddress as string || '',
+      notes: selectedOrder?.notes as string || '',
     },
-    resolver: yupResolver(schema)
-  })
+    resolver: yupResolver(schema),
+  });
 
   const searchCustomers = debounce(async (searchTerm: string) => {
+    if (!searchTerm) return;
     try {
       setLoading(true);
       const response = await api.get('customers', {
-        params: { search: searchTerm }
+        params: { search: searchTerm },
       });
-      if (response.data.data.length > 0) {
-        setCustomers(response.data.data);
-      }
+      setCustomers(response.data.data);
     } catch (error) {
-      console.log(error);
-      return;
+      console.error(error);
     } finally {
       setLoading(false);
     }
-  }, 500)
+  }, 500);
 
   const onSubmit: SubmitHandler<FormData> = async (data: FormData) => {
     try {
-      const response = await api.post('orders', data);
-      onOrderAdded(response.data);
-
+      if (selectedOrder) {
+        await api.put(`orders/${selectedOrder.id}`, data);
+      } else {
+        await api.post('orders', data);
+      }
+      onOrderSaved();
       onClose();
-    } catch {
-      return;
+    } catch (error) {
+      console.error(error);
     }
-  }
+  };
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      reset({
+        customerNumber: selectedOrder?.customerNumber as string || '',
+        deliveryAddress: selectedOrder?.deliveryAddress as string || '',
+        notes: selectedOrder?.notes as string || '',
+      });
+
+      if (selectedOrder?.customerNumber) {
+        setCustomers([selectedOrder?.customer as Customer])
+        setValue('customerNumber', selectedOrder?.customerNumber as string);
+      }
+    } else {
       reset();
+      setCustomers([]);
     }
-  }, [open, reset])
+  }, [open, reset, selectedOrder, setValue]);
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth='sm'> 
-      <DialogTitle>Agregar Orden</DialogTitle>
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth='sm'>
+      <DialogTitle>{selectedOrder ? 'Editar Orden' : 'Agregar Orden'}</DialogTitle>
       <DialogContent dividers>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <Controller
-            name="customerNumber"
+            name='customerNumber'
             control={control}
             render={({ field: { onChange, value, ...field } }) => (
               <Autocomplete
                 {...field}
                 options={customers}
-                value={customers.find(customer => customer.customerNumber === value) || null}
+                value={customers.find((customer) => customer.customerNumber === value) || null}
                 getOptionLabel={(option: Customer) => option.name}
                 loading={loading}
                 onInputChange={(_, newInputValue) => {
                   if (newInputValue.length >= 2) {
                     searchCustomers(newInputValue);
+                  } else {
+                    setCustomers([]);
                   }
                 }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Cliente"
-                    margin="normal"
+                    label='Cliente'
+                    margin='normal'
                     error={!!errors.customerNumber}
                     helperText={errors.customerNumber?.message}
                   />
@@ -119,7 +132,9 @@ const AddOrderModel = ({ open, onClose, onOrderAdded}: AddOrderModelProps) => {
                 onChange={(_, newValue) => {
                   onChange(newValue ? newValue.customerNumber : '');
                 }}
-                isOptionEqualToValue={(option, value) => option.customerNumber === value.customerNumber}
+                isOptionEqualToValue={(option, value) =>
+                  option.customerNumber === value.customerNumber
+                }
               />
             )}
           />
@@ -140,24 +155,21 @@ const AddOrderModel = ({ open, onClose, onOrderAdded}: AddOrderModelProps) => {
             sx={{
               width: '100%',
               '& .MuiOutlinedInput-root': {
-                backgroundColor: '#f5f5f5'
-              }
+                backgroundColor: '#f5f5f5',
+              },
             }}
             {...register('notes')}
             error={!!errors.notes}
             helperText={errors.notes?.message}
             margin='normal'
           />
-          <Button
-            type='submit'
-            sx={{ marginY: '1rem' }}
-          >
-            Enviar
+          <Button type='submit' sx={{ marginY: '1rem' }}>
+            {selectedOrder ? 'Actualizar' : 'Enviar'}
           </Button>
         </form>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
 export default AddOrderModel;
