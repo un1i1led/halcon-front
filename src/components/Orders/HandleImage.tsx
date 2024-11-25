@@ -71,9 +71,14 @@ const HandleImage = ({ selectedRow, open, handleOpen, onClose, onUpload }: Handl
   const render = () => {
     const role = user.role;
     const status = selectedRow.status;
+    const images = selectedRow.images.length;
 
+    if (images === 2) return false;
     if (status === 'Ordered') return false;
-    if (role === 'route' || role === 'admin') return true;
+
+
+    if (images === 0 && role === 'admin' || role === 'warehouse') return true;
+    if (images === 1 && role === 'admin' || role === 'route') return true;
     return false;
   };
 
@@ -85,10 +90,10 @@ const HandleImage = ({ selectedRow, open, handleOpen, onClose, onUpload }: Handl
             handleOpen();
             setSelectedFile(null)
           }}>
-            {selectedRow.images.length > 1 ? 'Agregar foto carga' : 'Agregar foto descarga'}
+            {selectedRow.images.length < 1 ? 'Agregar foto carga' : 'Agregar foto descarga'}
         </Button>
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-          <DialogTitle>Upload Image</DialogTitle>
+          <DialogTitle>Subir Imagen</DialogTitle>
           <DialogContent>
             <input
               type="file"
@@ -104,7 +109,7 @@ const HandleImage = ({ selectedRow, open, handleOpen, onClose, onUpload }: Handl
           </DialogContent>
           <DialogActions>
             <Button onClick={onClose} disabled={loading}>
-              Cancel
+              Cancelar
             </Button>
             <Button
               onClick={handleUpload}
@@ -112,7 +117,7 @@ const HandleImage = ({ selectedRow, open, handleOpen, onClose, onUpload }: Handl
               variant="contained"
               disabled={!selectedFile || loading}
             >
-              {loading ? <CircularProgress size={24} /> : 'Upload'}
+              {loading ? <CircularProgress size={24} /> : 'Subir'}
             </Button>
           </DialogActions>
         </Dialog>
