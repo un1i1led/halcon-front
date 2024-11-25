@@ -44,10 +44,6 @@ const Users = () => {
     setViewingUser(false);
   }
 
-  const handleDialogExited = () => {
-    setSelectedRow(null);
-  }
-
   const onUserAdded = (newUser: Partial<User>) => {
     setUsers([...users, newUser]);
     setUserAmount(prev => prev + 1);
@@ -133,7 +129,6 @@ const Users = () => {
             data={selectedRow}
             labels={labels}
             onClose={unselectRow}
-            handleDialogExited={handleDialogExited}
           />
         </div>
       </div>
