@@ -76,9 +76,10 @@ const HandleImage = ({ selectedRow, open, handleOpen, onClose, onUpload }: Handl
     if (images === 2) return false;
     if (status === 'Ordered') return false;
 
+    if (role === 'admin') return true;
 
-    if (images === 0 && role === 'admin' || role === 'warehouse') return true;
-    if (images === 1 && role === 'admin' || role === 'route') return true;
+    if (images === 0 && role === 'warehouse') return true;
+    if (images === 1 && role === 'route') return true;
     return false;
   };
 
