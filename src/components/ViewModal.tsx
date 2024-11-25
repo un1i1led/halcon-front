@@ -12,7 +12,7 @@ interface ViewModalProps {
   onClose: () => void;
 }
 
-const SKIP_KEYS = [ 'id', 'deleted', 'customer' ];
+const SKIP_KEYS = [ 'id', 'deleted', 'customer', 'images' ];
 
 const formatValue = (key: string, value: string) => {
   if (key === 'createdAt' || key === 'updatedAt') {
