@@ -1,5 +1,4 @@
 import { Button, Stack } from '@mui/material';
-import { Row } from '../../types/TableTypes';
 import { getUserData } from '../../utils/getUserData'
 import api from '../../services/api';
 import { SetStateAction, Dispatch, useState } from 'react';
@@ -7,8 +6,8 @@ import HandleImage from './HandleImage';
 import { Order } from '../../types/Order';
 
 interface UpdaterProps {
-  selectedRow: Row;
-  setSelectedRow: Dispatch<SetStateAction<Row | null>>;
+  selectedRow: Order;
+  setSelectedRow: Dispatch<SetStateAction<Order | null>>;
   onOrderAdded: () => void;
 }
 
@@ -23,7 +22,7 @@ const HandleUpdates = ({ selectedRow, setSelectedRow, onOrderAdded }: UpdaterPro
     }
   }
 
-  const sendToDb = async (data: Row) => {
+  const sendToDb = async (data: Order) => {
     const response = await api.put(`orders/${data.id}`, data)
 
     if (response.data) {
@@ -33,7 +32,27 @@ const HandleUpdates = ({ selectedRow, setSelectedRow, onOrderAdded }: UpdaterPro
   }
 
   const handleImageUpload = async (file: File) => {
-    console.log(file);
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    if (selectedRow.images!.length < 1) {
+      formData.append('description', 'loaded');
+    } else {
+      formData.append('description', 'unloaded');
+    }
+
+    try {
+      const response = await api.post(`orders/upload/${selectedRow.id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data'}
+      })
+
+      if (response.data.order) {
+        setSelectedRow(response.data.order);
+        onOrderAdded();
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   const onClose = () => {
@@ -61,11 +80,13 @@ const HandleUpdates = ({ selectedRow, setSelectedRow, onOrderAdded }: UpdaterPro
     const status = selectedRow.status;
     const role = user.role;
 
+    if (selectedRow.status === 'Delivered') return false;
+
     if (role === 'admin') return true;
 
     if (role === 'purchasing' && status === 'Ordered') return true;
     if (role === 'warehouse' && status !== 'Ordered') return true;
-    if (role === 'route' && status !== 'Ordered' || status !== 'In Process') return true;
+    if (role === 'route' && status !== 'In route') return false;
 
     return false;
   }
