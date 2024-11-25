@@ -89,7 +89,7 @@ const AddOrderModel = ({ open, onClose, onOrderSaved, selectedOrder }: AddOrderM
       });
 
       if (selectedOrder?.customerNumber) {
-        setCustomers([selectedOrder?.customer as Customer])
+        setCustomers([selectedOrder?.customer as unknown as Customer])
         setValue('customerNumber', selectedOrder?.customerNumber as string);
       }
     } else {

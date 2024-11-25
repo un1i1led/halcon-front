@@ -7,10 +7,19 @@ interface GenerictableProps {
   data: Row[];
   onRowClick?: (row: Row) => void;
   loading?: boolean;
+  skipKeys?: string[]; 
 }
 
-const GenericTable = ({ columns, data, onRowClick, loading}: GenerictableProps) => {
+const GenericTable = ({ 
+  columns, 
+  data, 
+  onRowClick, 
+  loading, 
+  skipKeys = [] 
+}: GenerictableProps) => {
   const dataIsEmpty = !data || data.length === 0;
+  
+  const filteredColumns = columns.filter(column => !skipKeys.includes(column.key));
 
   return (
     <div className="table">
@@ -18,8 +27,12 @@ const GenericTable = ({ columns, data, onRowClick, loading}: GenerictableProps) 
         <BasicTable sx={{ minWidth: 650 }} aria-label='table'>
           <TableHead>
             <TableRow>
-              {columns.map((column) => (
-                <TableCell key={column.key} align='left' sx={{ color: '#2f2f2f', fontWeight: 'bold' }}>
+              {filteredColumns.map((column) => (
+                <TableCell 
+                  key={column.key} 
+                  align='left' 
+                  sx={{ color: '#2f2f2f', fontWeight: 'bold' }}
+                >
                   {column.label}
                 </TableCell>
               ))}
@@ -28,17 +41,17 @@ const GenericTable = ({ columns, data, onRowClick, loading}: GenerictableProps) 
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={columns.length} align='center'>
+                <TableCell colSpan={filteredColumns.length} align='center'>
                   <CircularProgress/>
                 </TableCell>
               </TableRow>
-            ): dataIsEmpty ? (
+            ) : dataIsEmpty ? (
               <TableRow>
-                <TableCell align='center'>
+                <TableCell colSpan={filteredColumns.length} align='center'>
                   No hay datos
                 </TableCell>
               </TableRow>
-            ): (
+            ) : (
               data.map((row, index) => (
                 <TableRow
                   key={index}
@@ -46,14 +59,14 @@ const GenericTable = ({ columns, data, onRowClick, loading}: GenerictableProps) 
                     '&:last-child td, &:last-child th': { border: 0 },
                     cursor: 'pointer',
                     '&:hover': {
-                      backgroundColor: 'action.hover' 
+                      backgroundColor: 'action.hover'
                     },
-                    transition: 'background-color 0.3s', 
+                    transition: 'background-color 0.3s',
                   }}
                   onClick={() => onRowClick && onRowClick(row)}
                   className='table-item'
                 >
-                  {columns.map((column) => (
+                  {filteredColumns.map((column) => (
                     <TableCell key={column.key} align='left'>
                       {column.render ? column.render(row[column.key], row) : row[column.key]}
                     </TableCell>
@@ -65,7 +78,7 @@ const GenericTable = ({ columns, data, onRowClick, loading}: GenerictableProps) 
         </BasicTable>
       </TableContainer>
     </div>
-  )
-}
+  );
+};
 
 export default GenericTable;

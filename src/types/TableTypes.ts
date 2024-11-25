@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 
 export interface Row {
-  [key: string]: string | number | boolean | object | null;
+  [key: string]: string | number | boolean |  null;
 }
 
 export interface Column {

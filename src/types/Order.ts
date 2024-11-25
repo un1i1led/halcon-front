@@ -5,12 +5,12 @@ export interface Order {
   customerNumber: string;
   notes: string;
   deleted: boolean;
-  images: Image[];
+  images: OrderImage[];
   createdAt: string;
   updatedAt: string;
 }
 
-interface Image {
+export interface OrderImage {
   id: number;
   imageUrl: string;
   description: string;
