@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../services/api';
 import GenericTable from '../components/GenericTable';
 import { Row, Column } from '../types/TableTypes';
-import { Button, Stack, Typography } from '@mui/material';
+import { Button, Pagination, Stack, Typography } from '@mui/material';
 import AddOrderModel from '../components/Orders/AddOrderModel';
 import ViewModal from '../components/ViewModal';
 import HandleUpdates from '../components/Orders/HandleUpdates';
@@ -12,6 +12,8 @@ import ImageGalleryDialog from '../components/ImageGalleryDialog';
 
 const Dashboard = () => {
   const [orders,       setOrders       ] = useState<Row[]>([]);
+  const [totalPages,   setTotalPages   ] = useState(0);
+  const [page,         setPage         ] = useState(1);
   const [orderAmount,  setOrderAmount  ] = useState(0);
   const [addingOrder,  setAddingOrder  ] = useState(false);
   const [viewingOrder, setViewingOrder ] = useState(false);
@@ -23,11 +25,14 @@ const Dashboard = () => {
 
   const getOrders = async () => {
     const response = await api.get('orders', {
-      params: { page: '1', limit: '10', status: '' }
+      params: { page, limit: '10', status: '' }
     });
     if (response.data) {
-      setOrders(response.data.data);
-      setOrderAmount(response.data.totalItems);
+      const { data , totalPages, totalItems } = response.data;
+
+      setOrders(data);
+      setOrderAmount(totalItems);
+      setTotalPages(totalPages);
     } else {
       return;
     }
@@ -35,7 +40,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     getOrders();
-  }, [added])
+  }, [added, page])
 
   const handleClose = () => {
     setAddingOrder(false);
@@ -132,6 +137,12 @@ const Dashboard = () => {
             data={orders}
             onRowClick={selectRow}
             skipKeys={['images']}
+          />
+          <Pagination 
+            count={totalPages} 
+            page={page} 
+            onChange={(_event, page) => setPage(page)} 
+            sx={{ marginTop: '1rem' }}
           />
           <AddOrderModel 
             open={addingOrder} 
