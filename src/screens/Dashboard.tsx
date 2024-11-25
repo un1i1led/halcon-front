@@ -7,14 +7,17 @@ import AddOrderModel from '../components/Orders/AddOrderModel';
 import ViewModal from '../components/ViewModal';
 import HandleUpdates from '../components/Orders/HandleUpdates';
 import { getUserData } from '../utils/getUserData';
+import { Order } from '../types/Order';
+import ImageGalleryDialog from '../components/ImageGalleryDialog';
 
 const Dashboard = () => {
   const [orders,       setOrders       ] = useState<Row[]>([]);
   const [orderAmount,  setOrderAmount  ] = useState(0);
   const [addingOrder,  setAddingOrder  ] = useState(false);
   const [viewingOrder, setViewingOrder ] = useState(false);
-  const [selectedRow,  setSelectedRow  ] = useState<Row | null>(null);
+  const [selectedRow,  setSelectedRow  ] = useState<Order | null>(null);
   const [added,        setAdded        ] = useState(false); 
+  const [showImages,   setShowImages   ] = useState(false);
   
   const user = getUserData();
 
@@ -40,7 +43,7 @@ const Dashboard = () => {
 
   const selectRow = (row: Row) => {
     setViewingOrder(true);
-    setSelectedRow(row as { [key: string]: string });
+    setSelectedRow(row as unknown as Order);
   }
 
   const unselectRow = () => {
@@ -128,34 +131,45 @@ const Dashboard = () => {
             columns={columns} 
             data={orders}
             onRowClick={selectRow}
+            skipKeys={['images']}
           />
           <AddOrderModel 
             open={addingOrder} 
             onClose={handleClose}
             onOrderSaved={onOrderAdded}
-            selectedOrder={selectedRow}
+            selectedOrder={selectedRow as unknown as Row}
           />
           <ViewModal
             open={viewingOrder}
-            title={
-              `Orden ${selectedRow?.id} - Cliente ${selectedRow?.customerNumber}`
-            }
-            data={selectedRow}
+            title={`Orden ${selectedRow?.id} - Cliente ${selectedRow?.customerNumber}`}
+            data={selectedRow as unknown as Row}
             labels={labels}
             onClose={unselectRow}
           >
-            <Stack 
-              spacing={2} 
-              direction={'row'} 
-            >
+            <Stack spacing={2} direction={'row'}>
               <Button onClick={handleEdit}>Editar</Button>
-              {selectedRow &&
-                <HandleUpdates
-                  selectedRow={selectedRow}
-                  setSelectedRow={setSelectedRow}
-                  onOrderAdded={onOrderAdded}
-                />
-              }
+              {selectedRow && (
+                <>
+                  <HandleUpdates
+                    selectedRow={selectedRow as unknown as Order}
+                    setSelectedRow={setSelectedRow}
+                    onOrderAdded={onOrderAdded}
+                  />
+                  {selectedRow.images.length > 0 && (
+                    <>
+                      <Button onClick={() => setShowImages(!showImages)}>
+                        Ver imagenes
+                      </Button>
+                      <ImageGalleryDialog
+                      open={showImages}
+                      onClose={() => setShowImages(false)}
+                      images={selectedRow.images}
+                      baseUrl={import.meta.env?.VITE_API_URL}
+                      />
+                    </>
+                  )}
+                </>
+              )}
             </Stack>
           </ViewModal>
         </div>
